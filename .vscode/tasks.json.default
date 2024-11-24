@@ -1,0 +1,53 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "DEBUG CONFIG CMAKE",
+            "type": "shell",
+            "command": "cmake -B build -DCMAKE_BUILD_TYPE=Debug -DF_CPU=16000000UL -DMCU=atmega328p"
+        },
+        {
+            "label": "RELEASE CONFIG CMAKE",
+            "type": "shell",
+            "command": "cmake -B build -DCMAKE_BUILD_TYPE=Release -DF_CPU=16000000UL -DMCU=atmega328p"
+        },
+        {
+            "label": "DEBUG BUILD CMAKE",
+            "type": "shell",
+            "command": "cmake --build build --config Debug -j 8",
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "dependsOn": "DEBUG CONFIG CMAKE"
+        },
+        {
+            "label": "RELEASE BUILD CMAKE",
+            "type": "shell",
+            "command": "cmake --build build --config Release -j 8",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            },
+            "problemMatcher": [
+                "$gcc"
+            ],
+            "dependsOn": "RELEASE CONFIG CMAKE"
+        },
+        {
+            "label": "RELEASE FLASH AVRDUDE_LINUX ATMEGA328P_ARDUINO_UNO",
+            "type": "shell",
+            "command": "avrdude -carduino -P/dev/ttyUSB0 -b115200 -D -p atmega328p -U flash:w:build/src/atmega-snake.elf",
+            "dependsOn": "RELEASE BUILD CMAKE",
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            },
+        },
+    ]
+}

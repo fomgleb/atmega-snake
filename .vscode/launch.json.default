@@ -1,0 +1,51 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "SIMAVR_LINUX RUN ATMEGA328P PORT:1234",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "/usr/local/bin/simavr",
+            "args": [
+                "--freq",
+                "16000000",
+                "--mcu",
+                "atmega328p",
+                "--gdb",
+                "1234",
+                // "-ff",
+                // "build/src/atmega-snake.hex",
+                // "-ee",
+                // "build/src/atmega-snake_eeprom.hex",
+                "build/src/atmega-snake.elf"
+            ],
+            "cwd": "${workspaceFolder}",
+            "stopAtEntry": false,
+            "externalConsole": false,
+            "preLaunchTask": "CMAKE BUILD DEBUG"
+        },
+        {
+            "name": "AVR-GDB_LINUX DEBUG PORT:1234",
+            "type": "cppdbg",
+            "request": "launch",
+            "program": "${workspaceFolder}/build/src/atmega-snake.elf",
+            "MIMode": "gdb",
+            "miDebuggerPath": "/usr/bin/avr-gdb",
+            "miDebuggerServerAddress": "localhost:1234",
+            "stopAtEntry": false,
+            "cwd": "${workspaceFolder}",
+            "environment": [],
+            "externalConsole": false,
+            "preLaunchTask": "CMAKE BUILD DEBUG",
+        }
+    ],
+    "compounds": [
+        {
+            "name": "SIMAVR_LINUX DEBUG ATMEGA328P",
+            "configurations": [
+                "SIMAVR_LINUX RUN ATMEGA328P PORT:1234",
+                "AVR-GDB_LINUX DEBUG PORT:1234"
+            ]
+        }
+    ]
+}
