@@ -2,6 +2,7 @@
 #define ATMEGA_SNAKE_OLED_H_
 
 #include <inttypes.h>
+#include "twi.h"
 
 typedef enum {
     OLED_COMMAND_DISABLE_DISPLAY = 0xAE, // Turns the OLED panel OFF (sleep mode)
@@ -36,7 +37,6 @@ typedef enum {
 } OLED_ADDRESSING_MODE;
 
 void oled_init(void);
-void oled_start(uint8_t twi_oled_address);
 
 void oled_send_command_once(uint8_t twi_oled_address, OLED_COMMAND command);
 void oled_send_command_brightness_once(uint8_t twi_oled_address, uint8_t brightness_value);
@@ -54,10 +54,15 @@ void oled_set_multiplex_ratio(uint8_t twi_oled_address, uint8_t ratio);
 void oled_set_scan_direction(uint8_t twi_oled_address, OLED_SCAN_DIRECTION scan_direction);
 void oled_set_display_offset(uint8_t twi_oled_address, uint8_t offset);
 
-void oled_start_sending_data(uint8_t twi_oled_address);
-void oled_send_data(uint8_t data_byte);
-void oled_stop_sending_data(void);
+void oled_start_rendering_and_wait(uint8_t twi_oled_address);
+void oled_render_byte(uint8_t byte_value);
 
-void oled_send_data_once(uint8_t data_byte);
+// static REAL_INLINE bool
+// oled_byte_is_rendered(void) {
+//     return twi_read_flag_and_clear()
+//     return twi_state_data_byte_sent();
+// }
+
+void oled_stop_sending_data(void);
 
 #endif // ATMEGA_SNAKE_OLED_H_
