@@ -17,14 +17,18 @@ main(void) {
     initialize_oled();
     clear_oled();
 
-    bytes_matrix_t frame_buffer = bm_create(OLED_COLUMNS_COUNT, OLED_ROWS_COUNT);
+    matrix_u8_t frame_buffer = mx_create(uint8_t, OLED_COLUMNS_COUNT, OLED_ROWS_COUNT);
 
     const uint8_t SQUARES_COUNT = 50;
     square_t* squares = create_squares(SQUARES_COUNT);
 
     oled_start_sending_data(OLED_ADDRESS);
     while (1) {
-        bm_clear(&frame_buffer);
+        for (uint8_t y = 0; y < frame_buffer.height; y++) {
+            for (uint8_t x = 0; x < frame_buffer.width; x++) {
+                mx_set(&frame_buffer, x, y, 0);
+            }
+        }
 
         for (uint8_t i = 0; i < SQUARES_COUNT; i++) {
             sqr_bouncing_move(&squares[i]);
@@ -36,13 +40,13 @@ main(void) {
 
         for (uint8_t y = 0; y < frame_buffer.height; y++) {
             for (uint8_t x = 0; x < frame_buffer.width; x++) {
-                oled_send_data(bm_get_byte(&frame_buffer, x, y));
+                oled_send_data(mx_get(&frame_buffer, x, y));
             }
         }
     }
     oled_stop_sending_data();
 
-    bm_delete(&frame_buffer);
+    mx_delete(&frame_buffer);
 
     return 0;
 }

@@ -26,7 +26,6 @@ target_compile_options(
             -Wbad-function-cast
             -Wbool-compare
             -Wbuiltin-macro-redefined
-            -Wc99-c11-compat
             -Wcast-align
             -Wcast-qual
             -Wchar-subscripts

@@ -5,7 +5,7 @@
 #define NUMBER_OF_BITS_IN_PAGE 8
 
 void
-sqr_render_to_frame_buffer(bytes_matrix_t* frame_buffer, const square_t* square) {
+sqr_render_to_frame_buffer(matrix_u8_t* frame_buffer, const square_t* square) {
     uint8_t start_page_index = square->position.y / NUMBER_OF_BITS_IN_PAGE;
     uint8_t end_page_index = (square->position.y + square->size) / NUMBER_OF_BITS_IN_PAGE;
 
@@ -14,16 +14,19 @@ sqr_render_to_frame_buffer(bytes_matrix_t* frame_buffer, const square_t* square)
 
     if (start_page_index == end_page_index) {
         for (uint8_t x = square->position.x; x < square->position.x + square->size; x++) {
-            bm_operation_or(frame_buffer, x, start_page_index,
-                            (0xFF << start_bit_index_of_start_page) & ~(0xFF << end_bit_index_of_end_page));
+            mx_set(frame_buffer, x, start_page_index,
+                   mx_get(frame_buffer, x, start_page_index)
+                       | ((0xFF << start_bit_index_of_start_page) & ~(0xFF << end_bit_index_of_end_page)));
         }
     } else {
         for (uint8_t x = square->position.x; x < square->position.x + square->size; x++) {
-            bm_operation_or(frame_buffer, x, start_page_index, 0xFF << start_bit_index_of_start_page);
+            mx_set(frame_buffer, x, start_page_index,
+                   mx_get(frame_buffer, x, start_page_index) | (0xFF << start_bit_index_of_start_page));
             for (uint8_t y_page = start_page_index + 1; y_page < end_page_index; y_page++) {
-                bm_operation_or(frame_buffer, x, y_page, 0xFF);
+                mx_set(frame_buffer, x, y_page, mx_get(frame_buffer, x, y_page) | 0xFF);
             }
-            bm_operation_or(frame_buffer, x, end_page_index, ~(0xFF << end_bit_index_of_end_page));
+            mx_set(frame_buffer, x, end_page_index,
+                   mx_get(frame_buffer, x, end_page_index) | ~(0xFF << end_bit_index_of_end_page));
         }
     }
 }
