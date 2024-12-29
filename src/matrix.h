@@ -7,9 +7,9 @@
 
 #define DEFINE_MATRIX_TYPE(TYPE, SUFFIX)                                                                               \
     typedef struct {                                                                                                   \
-        TYPE* const _arr;                                                                                              \
-        const uint8_t width;                                                                                           \
-        const uint8_t height;                                                                                          \
+        TYPE* _arr;                                                                                                    \
+        uint8_t width;                                                                                                 \
+        uint8_t height;                                                                                                \
     } matrix_##SUFFIX##_t;                                                                                             \
                                                                                                                        \
     static REAL_INLINE matrix_##SUFFIX##_t mx_##SUFFIX##_create(uint8_t w, uint8_t h) {                                \
@@ -46,10 +46,14 @@ DEFINE_MATRIX_TYPE(uint16_t, u16)
 #define mx_delete(matrix_ptr)                                                                                          \
     _Generic((matrix_ptr), matrix_u8_t *: mx_u8_delete, matrix_u16_t *: mx_u16_delete)(matrix_ptr)
 
-#define mx_set(matrix_ptr, x, y, value)                                                                             \
+#define mx_set(matrix_ptr, x, y, value)                                                                                \
     _Generic((matrix_ptr), matrix_u8_t *: mx_u8_assign, matrix_u16_t *: mx_u16_assign)(matrix_ptr, x, y, value)
 
 #define mx_get(matrix_ptr, x, y)                                                                                       \
-    _Generic((matrix_ptr), matrix_u8_t *: mx_u8_get, matrix_u16_t *: mx_u16_get)(matrix_ptr, x, y)
+    _Generic((matrix_ptr),                                                                                             \
+        matrix_u8_t *: mx_u8_get,                                                                                      \
+        matrix_u16_t *: mx_u16_get,                                                                                    \
+        const matrix_u8_t*: mx_u8_get,                                                                                 \
+        const matrix_u16_t*: mx_u16_get)(matrix_ptr, x, y)
 
 #endif /* ATMEGA_SNAKE_MATRIX_H_ */

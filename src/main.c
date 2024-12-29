@@ -1,8 +1,9 @@
-#include <string.h>
+#include <avr/interrupt.h>
 #include <util/delay.h>
+#include "food_spawner.h"
+#include "matrix_keyboard.h"
 #include "oled.h"
-#include "square.h"
-#include "stdlib.h"
+#include "timer.h"
 
 #define OLED_ADDRESS       0x3C /* 00111100 */
 #define OLED_COLUMNS_COUNT 128
@@ -10,17 +11,25 @@
 
 static void initialize_oled(void);
 static void clear_oled(void);
-square_t* create_squares(uint8_t squares_count);
+static matrix_keyboard_t create_matrix_keyboard(void);
+
+static bool move_snake_please = false;
+TMR1_INTERRUPT { move_snake_please = true; }
 
 int
 main(void) {
+    sei();
+    tmr1_init();
+
     initialize_oled();
     clear_oled();
 
     matrix_u8_t frame_buffer = mx_create(uint8_t, OLED_COLUMNS_COUNT, OLED_ROWS_COUNT);
+    matrix_keyboard_t matrix_keyboard = create_matrix_keyboard();
+    snake_t snake = snk_create((point_u8_t){10, 10}, 5, (point_u8_t){OLED_COLUMNS_COUNT, OLED_ROWS_COUNT}, 4);
+    point_u8_t food_position = fs_get_random_food_position(&snake);
 
-    const uint8_t SQUARES_COUNT = 50;
-    square_t* squares = create_squares(SQUARES_COUNT);
+    direction_t snake_direction = LEFT;
 
     oled_start_sending_data(OLED_ADDRESS);
     while (1) {
@@ -30,13 +39,34 @@ main(void) {
             }
         }
 
-        for (uint8_t i = 0; i < SQUARES_COUNT; i++) {
-            sqr_bouncing_move(&squares[i]);
+        if (mk_button_is_pressed(&matrix_keyboard.column2, &matrix_keyboard.row1)) {
+            snake_direction = UP;
+        } else if (mk_button_is_pressed(&matrix_keyboard.column1, &matrix_keyboard.row2)) {
+            snake_direction = LEFT;
+        } else if (mk_button_is_pressed(&matrix_keyboard.column2, &matrix_keyboard.row2)) {
+            snake_direction = DOWN;
+        } else if (mk_button_is_pressed(&matrix_keyboard.column3, &matrix_keyboard.row2)) {
+            snake_direction = RIGHT;
         }
 
-        for (uint8_t i = 0; i < SQUARES_COUNT; i++) {
-            sqr_render_to_frame_buffer(&frame_buffer, &squares[i]);
+        if (move_snake_please) {
+            move_snake_please = false;
+            bool snake_collided = false;
+            bool snake_ate_food = false;
+            snk_move(&snake, snake_direction, food_position, &snake_collided, &snake_ate_food);
+            if (snake_ate_food) {
+                food_position = fs_get_random_food_position(&snake);
+            }
+
+            if (snake_collided) {
+                snk_delete(&snake);
+                snake = snk_create((point_u8_t){10, 10}, 3, (point_u8_t){OLED_COLUMNS_COUNT, OLED_ROWS_COUNT}, 4);
+                snake_direction = LEFT;
+            }
         }
+
+        snk_render(&frame_buffer, &snake);
+        fs_render_food(&frame_buffer, food_position);
 
         for (uint8_t y = 0; y < frame_buffer.height; y++) {
             for (uint8_t x = 0; x < frame_buffer.width; x++) {
@@ -89,26 +119,17 @@ clear_oled(void) {
     oled_stop_sending_data();
 }
 
-uint8_t random_numbers[50] = {123, 147, 3,   83,  56,  188, 180, 131, 173, 42,  97,  125, 148, 102, 157, 221, 105,
-                              243, 226, 202, 51,  30,  58,  24,  231, 196, 145, 123, 19,  175, 12,  171, 137, 32,
-                              179, 225, 63,  173, 254, 9,   234, 75,  48,  97,  100, 230, 87,  10,  49,  229};
-
-square_t*
-create_squares(uint8_t squares_count) {
-    square_t* squares = malloc(squares_count * sizeof(square_t));
-    for (uint8_t i = 0; i < squares_count; i++) {
-        square_t temp = {
-            .position = {random_numbers[i] % 128, random_numbers[i] % 64},
-            .min_position = {0, 0},
-            .max_position = {127 - 2 + 1, 63 - 2 + 1},
-            .speed = {random_numbers[i] % 2 == 0 ? (random_numbers[i % 50] % 5) : -(random_numbers[i] % 5),
-                      random_numbers[i] % 2 == 0 ? -(random_numbers[i] % 5) : (random_numbers[(i * 2) % 50] % 5)},
-            .size = 2,
-        };
-        temp.speed.x = temp.speed.x == 0 ? 1 : temp.speed.x;
-        temp.speed.y = temp.speed.y == 0 ? 1 : temp.speed.y;
-        memcpy(&squares[i], &temp, sizeof(square_t));
-    }
-
-    return squares;
+static matrix_keyboard_t
+create_matrix_keyboard(void) {
+    matrix_keyboard_t matrix_keyboard = {
+        .row1 = leg_create_output_leg(&DDRB, &PORTB, PB0),
+        .row2 = leg_create_output_leg(&DDRD, &PORTD, PD7),
+        .row3 = leg_create_output_leg(&DDRD, &PORTD, PD6),
+        .row4 = leg_create_output_leg(&DDRD, &PORTD, PD5),
+        .column1 = leg_create_input_leg(&DDRD, &PORTD, &PIND, PD4),
+        .column2 = leg_create_input_leg(&DDRD, &PORTD, &PIND, PD3),
+        .column3 = leg_create_input_leg(&DDRD, &PORTD, &PIND, PD2),
+    };
+    mk_init(&matrix_keyboard);
+    return matrix_keyboard;
 }
