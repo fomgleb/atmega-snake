@@ -9,8 +9,9 @@ project(
 
 set(F_CPU 16000000UL CACHE STRING "CPU Frequency")
 set(MCU atmega328p CACHE STRING "Microcontroller")
+set(TWI_SPEED 400000L CACHE STRING "TWI Speed")
 
-add_definitions(-DF_CPU=${F_CPU})
+add_definitions(-DF_CPU=${F_CPU} -DTWI_SPEED=${TWI_SPEED})
 set(CMAKE_C_FLAGS "-mmcu=${MCU}")
 set(CMAKE_EXE_LINKER_FLAGS -mmcu=${MCU})
 
