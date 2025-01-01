@@ -7,8 +7,8 @@ project(
   VERSION 0.2
   LANGUAGES C)
 
-set(F_CPU 16000000UL)
-set(MCU atmega328p)
+set(F_CPU 16000000UL CACHE STRING "CPU Frequency")
+set(MCU atmega328p CACHE STRING "Microcontroller")
 
 add_definitions(-DF_CPU=${F_CPU})
 set(CMAKE_C_FLAGS "-mmcu=${MCU}")
