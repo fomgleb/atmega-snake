@@ -1,0 +1,59 @@
+<circuit version="1.1.0-SR1" rev="2005" stepSize="1000000" stepsPS="1000000" NLsteps="100000" reaStep="1000000" animate="1" >
+
+<item itemtype="Ssd1306" CircId="Ssd1306-1" mainComp="false" Show_id="true" Show_Val="false" Pos="-12,128" rotation="360" hflip="1" vflip="1" label="Ssd1306-1" idLabPos="12.393,23.6638" labelrot="0" valLabPos="-16,20" valLabRot="0" Color="White" Width="128 _px" Height="64 _px" Rotate="false" Control_Code="60" Frequency="100 _kHz" />
+
+<item itemtype="MCU" CircId="mega328PB-2" mainComp="false" Show_id="true" Show_Val="false" Pos="-108,240" rotation="0" hflip="1" vflip="1" label="mega328PB" idLabPos="18.0987,10.0507" labelrot="0" valLabPos="-16,20" valLabRot="0" Frequency="16 MHz" Program="../build/src/atmega-snake.hex" Auto_Load="true" saveEepr="false" Ext_Osc="false" Wdt_enabled="false" Clk_Out="false" MainMcu="true" SerialMon="-1" />
+
+<item itemtype="Resistor" CircId="Resistor-7" mainComp="false" ShowProp="Resistance" Show_id="false" Show_Val="true" Pos="-88,200" rotation="0" hflip="1" vflip="1" label="Resistor-7" idLabPos="-16,-24" labelrot="0" valLabPos="-9.17031,-4.92751" valLabRot="0" Resistance="1 kΩ" />
+
+<item itemtype="SerialTerm" CircId="SerialTerm-36" mainComp="false" Show_id="false" Show_Val="false" Pos="-208,208" rotation="0" hflip="1" vflip="1" label="SerialTerm-36" idLabPos="-20,-32" labelrot="0" valLabPos="-16,20" valLabRot="0" Baudrate="9600 _Bd" DataBits="8 _bits" StopBits="1 _bits" SerialMon="false" />
+
+<item itemtype="Rail" CircId="Rail-37" mainComp="false" ShowProp="Voltage" Show_id="false" Show_Val="true" Pos="-116,164" rotation="90" hflip="1" vflip="1" label="Rail-37" idLabPos="-5,-10" labelrot="-90" valLabPos="-12,6" valLabRot="-90" Voltage="5 V" />
+
+<item itemtype="KeyPad" CircId="KeyPad-41" mainComp="false" Show_id="false" Show_Val="false" Pos="16,216" rotation="0" hflip="1" vflip="1" label="KeyPad-41" idLabPos="-8,-16" labelrot="0" valLabPos="-16,20" valLabRot="0" Rows="4" Cols="3" Key_Labels="123456789*0#" />
+
+<item itemtype="Resistor" CircId="Resistor-6" mainComp="false" ShowProp="Resistance" Show_id="false" Show_Val="true" Pos="-88,188" rotation="0" hflip="1" vflip="1" label="Resistor-6" idLabPos="-16,-24" labelrot="0" valLabPos="-9.97381,-5.38281" valLabRot="0" Resistance="1 kΩ" />
+
+<item itemtype="Node" CircId="Node-63" mainComp="false" Pos="-116,188" />
+
+<item itemtype="Node" CircId="Node-67" mainComp="false" Pos="-60,188" />
+
+<item itemtype="Node" CircId="Node-68" mainComp="false" Pos="-52,200" />
+
+<item itemtype="Connector" uid="Connector-126" startpinid="KeyPad-41-Pin0" endpinid="mega328PB-2-PORTB0" pointList="64,224,92,224,92,348,-68,348,-68,336" />
+
+<item itemtype="Connector" uid="Connector-127" startpinid="mega328PB-2-PORTD7" endpinid="KeyPad-41-Pin1" pointList="-76,336,-76,352,88,352,88,240,64,240" />
+
+<item itemtype="Connector" uid="Connector-128" startpinid="mega328PB-2-PORTD6" endpinid="KeyPad-41-Pin2" pointList="-84,336,-84,356,84,356,84,256,64,256" />
+
+<item itemtype="Connector" uid="Connector-129" startpinid="mega328PB-2-PORTD5" endpinid="KeyPad-41-Pin3" pointList="-92,336,-92,360,80,360,80,272,64,272" />
+
+<item itemtype="Connector" uid="Connector-130" startpinid="mega328PB-2-PORTD4" endpinid="KeyPad-41-Pin4" pointList="-116,264,-124,264,-124,364,16,364,16,288" />
+
+<item itemtype="Connector" uid="Connector-131" startpinid="mega328PB-2-PORTD3" endpinid="KeyPad-41-Pin5" pointList="-116,256,-128,256,-128,368,32,368,32,288" />
+
+<item itemtype="Connector" uid="Connector-153" startpinid="SerialTerm-36-pin1" endpinid="mega328PB-2-PORTC6" pointList="-232,216,-240,216,-240,240,-148,240,-148,212,-68,212,-68,232" />
+
+<item itemtype="Connector" uid="Connector-171" startpinid="mega328PB-2-PORTD0" endpinid="SerialTerm-36-pin0" pointList="-76,232,-76,216,-144,216,-144,244,-244,244,-244,200,-232,200" />
+
+<item itemtype="Connector" uid="Connector-173" startpinid="mega328PB-2-PORTD2" endpinid="KeyPad-41-Pin6" pointList="-92,232,-92,228,-132,228,-132,372,48,372,48,288" />
+
+<item itemtype="Connector" uid="Connector-176" startpinid="Resistor-6-lPin" endpinid="Node-63-1" pointList="-104,188,-116,188" />
+
+<item itemtype="Connector" uid="Connector-177" startpinid="Resistor-7-lPin" endpinid="Node-63-0" pointList="-104,200,-116,200,-116,188" />
+
+<item itemtype="Connector" uid="Connector-178" startpinid="Node-63-2" endpinid="Rail-37-outnod" pointList="-116,188,-116,180" />
+
+<item itemtype="Connector" uid="Connector-192" startpinid="Ssd1306-1-PinSck" endpinid="Node-67-1" pointList="-60,176,-60,188" />
+
+<item itemtype="Connector" uid="Connector-193" startpinid="mega328PB-2-PORTC5" endpinid="Node-67-0" pointList="-60,232,-60,188" />
+
+<item itemtype="Connector" uid="Connector-194" startpinid="Node-67-2" endpinid="Resistor-6-rPin" pointList="-60,188,-72,188" />
+
+<item itemtype="Connector" uid="Connector-195" startpinid="Node-68-1" endpinid="Ssd1306-1-PinSda" pointList="-52,200,-52,176" />
+
+<item itemtype="Connector" uid="Connector-196" startpinid="Resistor-7-rPin" endpinid="Node-68-0" pointList="-72,200,-52,200" />
+
+<item itemtype="Connector" uid="Connector-197" startpinid="Node-68-2" endpinid="mega328PB-2-PORTC4" pointList="-52,200,-52,232" />
+
+</circuit>
