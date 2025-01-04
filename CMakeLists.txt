@@ -4,7 +4,7 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_C_COMPILER avr-gcc)
 project(
   atmega-snake
-  VERSION 0.2
+  VERSION 0.2.1
   LANGUAGES C)
 
 set(F_CPU 16000000UL CACHE STRING "CPU Frequency")
