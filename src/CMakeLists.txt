@@ -14,4 +14,4 @@ add_custom_command(
 
 target_include_directories(${ELF_FILE} PRIVATE ${PRIVATE_HEADER_DIR})
 
-target_link_libraries(${ELF_FILE} PRIVATE project_warnings)
+target_link_libraries(${ELF_FILE} PRIVATE atmega_snake_warnings)
