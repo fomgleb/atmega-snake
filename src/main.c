@@ -32,6 +32,16 @@ main(void) {
     direction_t snake_direction = LEFT;
 
     oled_start_sending_data(OLED_ADDRESS);
+    // TODO: Somehow when running with SimulIDE, rendering pointer is not at the start of the display
+    if (TWI_SPEED == 100000) { /* If SimulIDE is used */
+        uint8_t x_ = 49;
+        for (uint8_t y = 0; y < frame_buffer.height; y++) {
+            for (; x_ < frame_buffer.width; x_++) {
+                oled_send_data(0x00);
+            }
+            x_ = 0;
+        }
+    }
     while (1) {
         for (uint8_t y = 0; y < frame_buffer.height; y++) {
             for (uint8_t x = 0; x < frame_buffer.width; x++) {
