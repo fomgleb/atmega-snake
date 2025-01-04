@@ -2,8 +2,8 @@
 #define ATMEGA_SNAKE_SQUARE_H_
 
 #include <inttypes.h>
-#include "matrix.h"
-#include "point.h"
+#include "avr-utils/common/matrix.h"
+#include "avr-utils/common/point.h"
 
 typedef struct _square_s_ {
     point_u8_t position; /* Left top corner of the square */

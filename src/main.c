@@ -59,8 +59,7 @@ main(void) {
             }
 
             if (snake_collided) {
-                snk_delete(&snake);
-                snake = snk_create((point_u8_t){10, 10}, 3, (point_u8_t){OLED_COLUMNS_COUNT, OLED_ROWS_COUNT}, 4);
+                snk_set_position(&snake, (point_u8_t){10, 10}, LEFT, 5);
                 snake_direction = LEFT;
             }
         }

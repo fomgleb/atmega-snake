@@ -151,4 +151,5 @@ target_compile_options(
             -Wvolatile-register-var
             -Wwrite-strings)
 
+add_subdirectory(lib)
 add_subdirectory(src)

@@ -1,7 +1,7 @@
 #ifndef ATMEGA_SNAKE_MATRIX_KEYBOARD_H_
 #define ATMEGA_SNAKE_MATRIX_KEYBOARD_H_
 
-#include "leg.h"
+#include "avr-utils/common/leg.h"
 
 typedef struct {
     output_leg_t row1;

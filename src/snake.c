@@ -78,18 +78,6 @@ snk_create(point_u8_t start_postion, uint8_t length, point_u8_t board_size, uint
     return snake;
 }
 
-void
-snk_delete(snake_t* snake) {
-    mx_delete(&snake->flesh_chunks);
-    mx_delete(&snake->directions);
-}
-
-#define SUM_POINTS_U8(point1, point2)                                                                                  \
-    (point_u8_t) { point1.x + point2.x, point1.y + point2.y }
-
-#define SUM_POINTS_I8(point1, point2)                                                                                  \
-    (point_i8_t) { point1.x + point2.x, point1.y + point2.y }
-
 REAL_INLINE static point_i8_t
 get_direction_point(direction_t direction) {
     point_i8_t direction_point = {.x = 0, .y = 0};
@@ -101,6 +89,35 @@ get_direction_point(direction_t direction) {
         default: break;
     }
     return direction_point;
+}
+
+void
+snk_set_position(snake_t* snake, point_u8_t head_position, direction_t direction, uint8_t length) {
+    for (uint8_t y = 0; y < snake->flesh_chunks.height; y++) {
+        for (uint8_t x = 0; x < snake->flesh_chunks.width; x++) {
+            mx_set(&snake->flesh_chunks, x, y, 0x00);
+        }
+    }
+
+    snake->length = length;
+    snake->head_position = head_position;
+
+    point_i8_t flesh_position;
+    for (uint8_t i = 0; i < length; i++) {
+        point_i8_t direction_point = get_direction_point(direction);
+        point_i8_t flesh_offset = pnt_mul(pnt_invert(direction_point), ((point_i8_t){.x = i, .y = i}));
+        flesh_position = pnt_sum(POINT_I8(head_position), flesh_offset);
+
+        add_flesh_chunk(snake, POINT_U8(flesh_position), direction);
+    }
+
+    snake->tail_position = POINT_U8(flesh_position);
+}
+
+void
+snk_delete(snake_t* snake) {
+    mx_delete(&snake->flesh_chunks);
+    mx_delete(&snake->directions);
 }
 
 void
@@ -120,7 +137,7 @@ snk_move(snake_t* snake, direction_t direction, point_u8_t food_position, bool* 
         direction = RIGHT;
     }
 
-    point_i8_t new_head_position = SUM_POINTS_I8(snake->head_position, get_direction_point(direction));
+    point_i8_t new_head_position = pnt_sum(POINT_I8(snake->head_position), get_direction_point(direction));
     if (new_head_position.x < 0 || new_head_position.x >= 32 || new_head_position.y < 0 || new_head_position.y >= 16
         || get_flesh_chunk(snake, (point_u8_t){.x = new_head_position.x, .y = new_head_position.y})) {
         *collided = true;
@@ -135,7 +152,7 @@ snk_move(snake_t* snake, direction_t direction, point_u8_t food_position, bool* 
     if (new_head_position.x != food_position.x || new_head_position.y != food_position.y) {
         point_i8_t tail_direction = get_direction_point(get_direction(&snake->directions, snake->tail_position));
         remove_flesh_chunk(snake, snake->tail_position);
-        snake->tail_position = SUM_POINTS_U8(snake->tail_position, tail_direction);
+        snake->tail_position = POINT_U8(pnt_sum(POINT_I8(snake->tail_position), tail_direction));
     } else {
         *ate_food = true;
     }

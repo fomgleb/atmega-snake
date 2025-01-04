@@ -1,7 +1,7 @@
 #include "timer.h"
 
 #include <avr/io.h>
-#include "mem.h"
+#include "avr-utils/common/mem.h"
 
 void
 tmr1_init(void) {
