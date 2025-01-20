@@ -29,7 +29,7 @@ main(void) {
     snake_t snake = snk_create((point_u8_t){10, 10}, 5, (point_u8_t){OLED_COLUMNS_COUNT, OLED_ROWS_COUNT}, 4);
     point_u8_t food_position = fs_get_random_food_position(&snake);
 
-    direction_t snake_direction = LEFT;
+    direction_t snake_direction = DIR_LEFT;
 
     oled_start_sending_data(OLED_ADDRESS);
     // TODO: Somehow when running with SimulIDE, rendering pointer is not at the start of the display
@@ -50,13 +50,13 @@ main(void) {
         }
 
         if (mk_button_is_pressed(&matrix_keyboard.column2, &matrix_keyboard.row1)) {
-            snake_direction = UP;
+            snake_direction = DIR_UP;
         } else if (mk_button_is_pressed(&matrix_keyboard.column1, &matrix_keyboard.row2)) {
-            snake_direction = LEFT;
+            snake_direction = DIR_LEFT;
         } else if (mk_button_is_pressed(&matrix_keyboard.column2, &matrix_keyboard.row2)) {
-            snake_direction = DOWN;
+            snake_direction = DIR_DOWN;
         } else if (mk_button_is_pressed(&matrix_keyboard.column3, &matrix_keyboard.row2)) {
-            snake_direction = RIGHT;
+            snake_direction = DIR_RIGHT;
         }
 
         if (move_snake_please) {
@@ -69,8 +69,8 @@ main(void) {
             }
 
             if (snake_collided) {
-                snk_set_position(&snake, (point_u8_t){10, 10}, LEFT, 5);
-                snake_direction = LEFT;
+                snk_set_position(&snake, (point_u8_t){10, 10}, DIR_LEFT, 5);
+                snake_direction = DIR_LEFT;
             }
         }
 

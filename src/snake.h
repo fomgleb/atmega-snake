@@ -4,13 +4,7 @@
 #include <stdbool.h>
 #include "avr-utils/common/matrix.h"
 #include "avr-utils/common/point.h"
-
-typedef enum {
-    UP = 0,    /* 0b00 */
-    RIGHT = 1, /* 0b01 */
-    DOWN = 2,  /* 0b10 */
-    LEFT = 3,  /* 0b11 */
-} direction_t;
+#include "direction.h"
 
 typedef struct {
     matrix_u8_t flesh_chunks; /* 0 - no flesh chunk; 1 - flesh chunk */

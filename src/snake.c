@@ -69,11 +69,11 @@ snk_create(point_u8_t start_postion, uint8_t length, point_u8_t board_size, uint
         .tail_position = (point_u8_t){start_postion.x + 4, start_postion.y},
     };
 
-    add_flesh_chunk(&snake, start_postion, LEFT);
-    add_flesh_chunk(&snake, (point_u8_t){start_postion.x + 1, start_postion.y}, LEFT);
-    add_flesh_chunk(&snake, (point_u8_t){start_postion.x + 2, start_postion.y}, LEFT);
-    add_flesh_chunk(&snake, (point_u8_t){start_postion.x + 3, start_postion.y}, LEFT);
-    add_flesh_chunk(&snake, (point_u8_t){start_postion.x + 4, start_postion.y}, LEFT);
+    add_flesh_chunk(&snake, start_postion, DIR_LEFT);
+    add_flesh_chunk(&snake, (point_u8_t){start_postion.x + 1, start_postion.y}, DIR_LEFT);
+    add_flesh_chunk(&snake, (point_u8_t){start_postion.x + 2, start_postion.y}, DIR_LEFT);
+    add_flesh_chunk(&snake, (point_u8_t){start_postion.x + 3, start_postion.y}, DIR_LEFT);
+    add_flesh_chunk(&snake, (point_u8_t){start_postion.x + 4, start_postion.y}, DIR_LEFT);
 
     return snake;
 }
@@ -82,10 +82,11 @@ REAL_INLINE static point_i8_t
 get_direction_point(direction_t direction) {
     point_i8_t direction_point = {.x = 0, .y = 0};
     switch (direction) {
-        case UP: direction_point.y--; break;
-        case RIGHT: direction_point.x++; break;
-        case DOWN: direction_point.y++; break;
-        case LEFT: direction_point.x--; break;
+        case DIR_UP: direction_point.y--; break;
+        case DIR_RIGHT: direction_point.x++; break;
+        case DIR_DOWN: direction_point.y++; break;
+        case DIR_LEFT: direction_point.x--; break;
+        case DIR_NONE:
         default: break;
     }
     return direction_point;
@@ -127,14 +128,14 @@ snk_move(snake_t* snake, direction_t direction, point_u8_t food_position, bool* 
 
     direction_t head_direction = get_direction(&snake->directions, snake->head_position);
     // TODO: fast solution, not convenient
-    if (head_direction == UP && direction == DOWN) {
-        direction = UP;
-    } else if (head_direction == DOWN && direction == UP) {
-        direction = DOWN;
-    } else if (head_direction == LEFT && direction == RIGHT) {
-        direction = LEFT;
-    } else if (head_direction == RIGHT && direction == LEFT) {
-        direction = RIGHT;
+    if (head_direction == DIR_UP && direction == DIR_DOWN) {
+        direction = DIR_UP;
+    } else if (head_direction == DIR_DOWN && direction == DIR_UP) {
+        direction = DIR_DOWN;
+    } else if (head_direction == DIR_LEFT && direction == DIR_RIGHT) {
+        direction = DIR_LEFT;
+    } else if (head_direction == DIR_RIGHT && direction == DIR_LEFT) {
+        direction = DIR_RIGHT;
     }
 
     point_i8_t new_head_position = pnt_sum(POINT_I8(snake->head_position), get_direction_point(direction));
