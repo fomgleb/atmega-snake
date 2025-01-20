@@ -1,17 +1,40 @@
 #include <avr/interrupt.h>
 #include <util/delay.h>
 #include "food_spawner.h"
-#include "matrix_keyboard.h"
+#include "joystick.h"
 #include "oled.h"
 #include "timer.h"
 
 #define OLED_ADDRESS       0x3C /* 00111100 */
 #define OLED_COLUMNS_COUNT 128
 #define OLED_ROWS_COUNT    8 /* One row is one byte and consists of 8 bits/pixels */
+#define JOYSTICK_DIRECTION DIR_UP_MACRO
 
+#if JOYSTICK_DIRECTION == DIR_UP_MACRO
+static const point_i16_t RIGTH_BOTTOM_JOYSTICK_CORNER = {.x = MAX_AXIS_VALUE, .y = MIN_AXIS_VALUE};
+static const point_i16_t LEFT_TOP_JOYSTICK_CORNER = {.x = MIN_AXIS_VALUE, .y = MAX_AXIS_VALUE};
+static const point_i16_t LEFT_BOTTOM_JOYSTICK_CORNER = {.x = MIN_AXIS_VALUE, .y = MIN_AXIS_VALUE};
+static const point_i16_t RIGHT_TOP_JOYSTICK_CORNER = {.x = MAX_AXIS_VALUE, .y = MAX_AXIS_VALUE};
+#elif JOYSTICK_DIRECTION == DIR_RIGHT_MACRO
+static const point_i16_t RIGTH_BOTTOM_JOYSTICK_CORNER = {.x = MIN_AXIS_VALUE, .y = MIN_AXIS_VALUE};
+static const point_i16_t LEFT_TOP_JOYSTICK_CORNER = {.x = MAX_AXIS_VALUE, .y = MAX_AXIS_VALUE};
+static const point_i16_t LEFT_BOTTOM_JOYSTICK_CORNER = {.x = MIN_AXIS_VALUE, .y = MAX_AXIS_VALUE};
+static const point_i16_t RIGHT_TOP_JOYSTICK_CORNER = {.x = MAX_AXIS_VALUE, .y = MIN_AXIS_VALUE};
+#elif JOYSTICK_DIRECTION == DIR_DOWN_MACRO
+static const point_i16_t RIGTH_BOTTOM_JOYSTICK_CORNER = {.x = MIN_AXIS_VALUE, .y = MAX_AXIS_VALUE};
+static const point_i16_t LEFT_TOP_JOYSTICK_CORNER = {.x = MAX_AXIS_VALUE, .y = MIN_AXIS_VALUE};
+static const point_i16_t LEFT_BOTTOM_JOYSTICK_CORNER = {.x = MAX_AXIS_VALUE, .y = MAX_AXIS_VALUE};
+static const point_i16_t RIGHT_TOP_JOYSTICK_CORNER = {.x = MIN_AXIS_VALUE, .y = MIN_AXIS_VALUE};
+#elif JOYSTICK_DIRECTION == DIR_LEFT_MACRO
+static const point_i16_t RIGTH_BOTTOM_JOYSTICK_CORNER = {.x = MAX_AXIS_VALUE, .y = MAX_AXIS_VALUE};
+static const point_i16_t LEFT_TOP_JOYSTICK_CORNER = {.x = MIN_AXIS_VALUE, .y = MIN_AXIS_VALUE};
+static const point_i16_t LEFT_BOTTOM_JOYSTICK_CORNER = {.x = MAX_AXIS_VALUE, .y = MIN_AXIS_VALUE};
+static const point_i16_t RIGHT_TOP_JOYSTICK_CORNER = {.x = MIN_AXIS_VALUE, .y = MAX_AXIS_VALUE};
+#endif
+
+static REAL_INLINE direction_t get_stick_direction(const joystick_t* joystick);
 static void initialize_oled(void);
 static void clear_oled(void);
-static matrix_keyboard_t create_matrix_keyboard(void);
 
 static bool move_snake_please = false;
 TMR1_INTERRUPT { move_snake_please = true; }
@@ -25,7 +48,7 @@ main(void) {
     clear_oled();
 
     matrix_u8_t frame_buffer = mx_create(uint8_t, OLED_COLUMNS_COUNT, OLED_ROWS_COUNT);
-    matrix_keyboard_t matrix_keyboard = create_matrix_keyboard();
+    joystick_t joystick = jk_create(ADC2, ADC1, btn_create(&DDRC, &PORTC, &PINC, PC0));
     snake_t snake = snk_create((point_u8_t){10, 10}, 5, (point_u8_t){OLED_COLUMNS_COUNT, OLED_ROWS_COUNT}, 4);
     point_u8_t food_position = fs_get_random_food_position(&snake);
 
@@ -49,14 +72,9 @@ main(void) {
             }
         }
 
-        if (mk_button_is_pressed(&matrix_keyboard.column2, &matrix_keyboard.row1)) {
-            snake_direction = DIR_UP;
-        } else if (mk_button_is_pressed(&matrix_keyboard.column1, &matrix_keyboard.row2)) {
-            snake_direction = DIR_LEFT;
-        } else if (mk_button_is_pressed(&matrix_keyboard.column2, &matrix_keyboard.row2)) {
-            snake_direction = DIR_DOWN;
-        } else if (mk_button_is_pressed(&matrix_keyboard.column3, &matrix_keyboard.row2)) {
-            snake_direction = DIR_RIGHT;
+        direction_t new_direction = get_stick_direction(&joystick);
+        if (new_direction != DIR_NONE) {
+            snake_direction = new_direction;
         }
 
         if (move_snake_please) {
@@ -88,6 +106,49 @@ main(void) {
     mx_delete(&frame_buffer);
 
     return 0;
+}
+
+static REAL_INLINE direction_t
+get_stick_direction(const joystick_t* joystick) {
+    if (joystick == NULL) {
+        return DIR_NONE;
+    }
+
+    static const int16_t DEAD_ZONE = 50;
+
+    point_i16_t stick_pos = POINT_I16(jk_get_stick_position(joystick));
+
+    if ((stick_pos.x <= IDLE_STICK_POS_XY + DEAD_ZONE) && (stick_pos.x >= IDLE_STICK_POS_XY - DEAD_ZONE)
+        && (stick_pos.y <= IDLE_STICK_POS_XY + DEAD_ZONE) && (stick_pos.y >= IDLE_STICK_POS_XY - DEAD_ZONE)) {
+        return DIR_NONE;
+    }
+
+    /* Equation of straight line */
+    bool is_up_or_right = ((stick_pos.y * 10 - RIGTH_BOTTOM_JOYSTICK_CORNER.y * 10)
+                               / (LEFT_TOP_JOYSTICK_CORNER.y - RIGTH_BOTTOM_JOYSTICK_CORNER.y)
+                           - (stick_pos.x * 10 - RIGTH_BOTTOM_JOYSTICK_CORNER.x * 10)
+                                 / (LEFT_TOP_JOYSTICK_CORNER.x - RIGTH_BOTTOM_JOYSTICK_CORNER.x))
+                          > 0;
+
+    /* Equation of straight line */
+    bool is_right_or_down = (stick_pos.x * 10 - LEFT_BOTTOM_JOYSTICK_CORNER.x * 10)
+                                    / (RIGHT_TOP_JOYSTICK_CORNER.x - LEFT_BOTTOM_JOYSTICK_CORNER.x)
+                                - (stick_pos.y * 10 - LEFT_BOTTOM_JOYSTICK_CORNER.y * 10)
+                                      / (RIGHT_TOP_JOYSTICK_CORNER.y - LEFT_BOTTOM_JOYSTICK_CORNER.y)
+
+                            > 0;
+
+    if (is_up_or_right && is_right_or_down) {
+        return DIR_RIGHT;
+    } else if (is_up_or_right && !is_right_or_down) {
+        return DIR_UP;
+    } else if (!is_up_or_right && is_right_or_down) {
+        return DIR_DOWN;
+    } else if (!is_up_or_right && !is_right_or_down) {
+        return DIR_LEFT;
+    }
+
+    return DIR_NONE;
 }
 
 static void
@@ -126,19 +187,4 @@ clear_oled(void) {
         }
     }
     oled_stop_sending_data();
-}
-
-static matrix_keyboard_t
-create_matrix_keyboard(void) {
-    matrix_keyboard_t matrix_keyboard = {
-        .row1 = leg_create_output_leg(&DDRB, &PORTB, PB0),
-        .row2 = leg_create_output_leg(&DDRD, &PORTD, PD7),
-        .row3 = leg_create_output_leg(&DDRD, &PORTD, PD6),
-        .row4 = leg_create_output_leg(&DDRD, &PORTD, PD5),
-        .column1 = leg_create_input_leg(&DDRD, &PORTD, &PIND, PD4),
-        .column2 = leg_create_input_leg(&DDRD, &PORTD, &PIND, PD3),
-        .column3 = leg_create_input_leg(&DDRD, &PORTD, &PIND, PD2),
-    };
-    mk_init(&matrix_keyboard);
-    return matrix_keyboard;
 }
